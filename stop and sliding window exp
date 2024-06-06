@@ -1,0 +1,106 @@
+*******************Stop and wait protocol********************
+
+import java.util.Random;
+class StopAndWaitProtocol {
+private static final int TIMEOUT = 1000; // Timeout in milliseconds
+// Simulating network delay
+private static void delay(int min, int max) {
+try {
+Thread.sleep(new Random().nextInt(max - min + 1) + min);
+} catch (InterruptedException e) {
+e.printStackTrace();
+
+}
+}
+// Sender side
+static void sender() {
+int frame = 0;
+while (frame < 10) {
+System.out.println("Sending Frame " + frame);
+delay(100, 200); // Simulating network delay
+System.out.println("Waiting for acknowledgment...");
+delay(500, 1000); // Simulating network delay
+System.out.println("Received acknowledgment for Frame " + frame);
+frame++;
+}
+}
+// Receiver side
+static void receiver() {
+int frame = 0;
+while (frame < 10) {
+delay(500, 1000); // Simulating network delay
+System.out.println("Received Frame " + frame);
+System.out.println("Sending acknowledgment for Frame " + frame);
+delay(100, 200); // Simulating network delay
+frame++;
+}
+}
+public static void main(String[] args) {
+Thread senderThread = new Thread(StopAndWaitProtocol::sender);
+Thread receiverThread = new Thread(StopAndWaitProtocol::receiver);
+senderThread.start();
+receiverThread.start();
+}
+}
+
+
+
+***********sliding window protocol*****************
+
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
+class SlidingWindowProtocol {
+private static final int WINDOW_SIZE = 4; // Window size
+
+private static final int TIMEOUT = 1000; // Timeout in milliseconds
+private static int sequenceNumber = 0; // Current sequence number
+// Simulating network delay
+private static void delay(int min, int max) {
+try {
+Thread.sleep(new Random().nextInt(max - min + 1) + min);
+} catch (InterruptedException e) {
+e.printStackTrace();
+}
+}
+// Sender side
+static void sender() {
+Queue<Integer> window = new LinkedList<>();
+// Initialize the window
+for (int i = 0; i < WINDOW_SIZE; i++) {
+window.add(sequenceNumber++);
+}
+while (!window.isEmpty()) {
+int frame = window.peek();
+System.out.println("Sending Frame " + frame);
+delay(100, 200); // Simulating network delay
+System.out.println("Waiting for acknowledgment...");
+delay(500, 1000); // Simulating network delay
+System.out.println("Received acknowledgment for Frame " + frame);
+window.poll();
+// If there are more frames, add them to the window
+if (sequenceNumber < 10) {
+window.add(sequenceNumber++);
+}
+}
+}
+// Receiver side
+static void receiver() {
+int expectedFrame = 0;
+while (expectedFrame < 10) {
+delay(500, 1000); // Simulating network delay
+System.out.println("Received Frame " + expectedFrame);
+
+System.out.println("Sending acknowledgment for Frame " + expectedFrame);
+delay(100, 200); // Simulating network delay
+expectedFrame++;
+}
+}
+public static void main(String[] args) {
+Thread senderThread = new Thread(SlidingWindowProtocol::sender);
+Thread receiverThread = new Thread(SlidingWindowProtocol::receiver);
+senderThread.start();
+receiverThread.start();
+}
+}
